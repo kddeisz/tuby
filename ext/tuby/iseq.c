@@ -100,7 +100,9 @@ VALUE tb_iseq_to_binary(VALUE self) {
   tb_id_list_to_idx_list(id_idx_list_size, obj_list, &ids_list, id_idx_list);
   tb_ibf_header_set_id_metadata(header, id_idx_list_size, 0);
 
+  tb_ibf_header_set_size(header, tb_buffer_size(buffer));
   tb_buffer_overwrite(buffer, header, sizeof(tb_ibf_header_t));
+
   const char *output = tb_buffer_output(buffer);
   size_t output_size = tb_buffer_size(buffer);
 

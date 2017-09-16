@@ -21,6 +21,7 @@ typedef struct tb_ibf_header {
 } tb_ibf_header_t;
 
 tb_ibf_header_t * tb_ibf_header_build(void);
+void tb_ibf_header_set_size(tb_ibf_header_t *header, unsigned int size);
 void tb_ibf_header_set_id_metadata(tb_ibf_header_t *header, unsigned int id_list_size, unsigned int id_list_offset);
 void tb_ibf_header_destroy(tb_ibf_header_t *header);
 
