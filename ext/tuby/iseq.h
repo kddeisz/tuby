@@ -5,9 +5,10 @@
 #include <ruby.h>
 
 typedef struct tb_iseq_location_struct tb_iseq_location_t;
-typedef struct tb_iseq_constant_body tb_iseq_constant_body_t;
+typedef struct tb_iseq tb_iseq_t;
 
 tb_iseq_location_t * tb_iseq_location_build(const char *filename);
-tb_iseq_constant_body_t * tb_iseq_constant_body_build(void);
+tb_iseq_t * tb_iseq_build(const char *filename);
+void Init_tuby_iseq(void);
 
 #endif

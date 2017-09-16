@@ -1,11 +1,13 @@
 module Tuby
   class InstructionSequence
-    attr_reader :ids, :local, :calls, :insns
+    attr_reader :ids, :local, :calls, :insns, :lines
 
     def initialize
       @ids = Set.new([0])
       @local = Set.new
       @calls = []
+      @insns = []
+      @lines = []
     end
 
     def add_operator(operator)
@@ -34,6 +36,7 @@ module Tuby
         if lineno != insn.lineno
           lineno = insn.lineno
           full << Insn.new(lineno, :trace, 1)
+          lines << LineInfo.new(full.size, lineno)
         end
         full << insn
       end

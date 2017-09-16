@@ -1,11 +1,39 @@
+#include "buffer.h"
+#include "obj_list.h"
+#include "ibf_header.h"
 #include "iseq.h"
+#include "line_info.h"
+#include "borrowed.h"
 
 typedef struct tb_iseq_location_struct {
-  VALUE pathobj;      /* String (path) or Array [path, realpath]. Frozen. */
-  VALUE base_label;   /* String */
-  VALUE label;        /* String */
-  VALUE first_lineno; /* TODO: may be unsigned short */
+  VALUE pathobj;
+  VALUE base_label;
+  VALUE label;
+  VALUE first_lineno;
 } tb_iseq_location_t;
+
+typedef struct tb_iseq {
+  enum iseq_type {
+    ISEQ_TYPE_TOP,
+    ISEQ_TYPE_METHOD,
+    ISEQ_TYPE_BLOCK,
+    ISEQ_TYPE_CLASS,
+    ISEQ_TYPE_RESCUE,
+    ISEQ_TYPE_ENSURE,
+    ISEQ_TYPE_EVAL,
+    ISEQ_TYPE_MAIN,
+    ISEQ_TYPE_DEFINED_GUARD
+  } type;
+
+  tb_iseq_location_t location;
+  tb_line_info_t *line_info_list;
+
+  union tb_iseq_inline_storage_entry *is_entries;
+
+  unsigned int is_size;
+  unsigned int ci_kw_size;
+  unsigned int line_info_size;
+} tb_iseq_t;
 
 tb_iseq_location_t * tb_iseq_location_build(const char *filename) {
   VALUE label = rb_str_new_cstr("<main>");
@@ -21,25 +49,73 @@ tb_iseq_location_t * tb_iseq_location_build(const char *filename) {
   return location;
 }
 
-typedef struct tb_iseq_constant_body {
-  enum iseq_type {
-    ISEQ_TYPE_TOP,
-    ISEQ_TYPE_METHOD,
-    ISEQ_TYPE_BLOCK,
-    ISEQ_TYPE_CLASS,
-    ISEQ_TYPE_RESCUE,
-    ISEQ_TYPE_ENSURE,
-    ISEQ_TYPE_EVAL,
-    ISEQ_TYPE_MAIN,
-    ISEQ_TYPE_DEFINED_GUARD
-  } type;              /* instruction sequence type */
-} tb_iseq_constant_body_t;
+tb_iseq_t * tb_iseq_build(const char *filename) {
+  tb_iseq_t *iseq = (tb_iseq_t *) malloc(sizeof(tb_iseq_t));
+  iseq->type = ISEQ_TYPE_TOP;
 
-tb_iseq_constant_body_t * tb_iseq_constant_body_build(void) {
-  tb_iseq_constant_body_t *body = (tb_iseq_constant_body_t *) malloc(sizeof(tb_iseq_constant_body_t));
-  body->type = ISEQ_TYPE_TOP;
-  return body;
+  tb_iseq_location_t *location = tb_iseq_location_build(filename);
+  iseq->location = *location;
+  iseq->is_entries = NULL;
+
+  iseq->is_size = 0;
+  iseq->ci_kw_size = 0;
+
+  return iseq;
 }
+
+void tb_iseq_set_line_info(tb_iseq_t *iseq, VALUE line_info_list) {
+  iseq->line_info_size = RARRAY_LEN(line_info_list);
+  iseq->line_info_list = (tb_line_info_t *) malloc(sizeof(tb_line_info_t) * iseq->line_info_size);
+
+  long idx;
+  tb_line_info_t *line_info;
+
+  for (idx = 0; idx < iseq->line_info_size; idx++) {
+    line_info = tb_line_info_struct(RARRAY_AREF(line_info_list, idx));
+    iseq->line_info_list[idx] = *line_info;
+  }
+}
+
+static void tb_id_list_to_idx_list(long size, ObjList *obj_list, VALUE *ids_list, long *idx_list) {
+  VALUE id;
+  long idx;
+
+  for (idx = 0; idx < size; idx++) {
+    id = RARRAY_AREF(*ids_list, idx);
+    idx_list[idx] = tb_obj_list_append(obj_list, &id);
+  }
+}
+
+static VALUE tb_iseq_to_binary(VALUE self) {
+  Buffer *buffer = tb_buffer_build();
+  ObjList *obj_list = tb_obj_list_build();
+  IBFHeader *header = tb_ibf_header_build();
+
+  tb_buffer_append(buffer, header, sizeof(IBFHeader));
+  tb_buffer_append(buffer, RUBY_PLATFORM, strlen(RUBY_PLATFORM) + 1);
+
+  VALUE ids_list = rb_funcall(self, rb_intern("ids_list"), 0, NULL);
+
+  long id_idx_list_size = RARRAY_LEN(ids_list);
+  long id_idx_list[id_idx_list_size];
+  tb_id_list_to_idx_list(id_idx_list_size, obj_list, &ids_list, id_idx_list);
+
+  const char *output = tb_buffer_output(buffer);
+  size_t output_size = tb_buffer_size(buffer);
+
+  tb_buffer_destroy(buffer);
+  tb_obj_list_destroy(obj_list);
+  tb_ibf_header_destroy(header);
+
+  return rb_str_new(output, output_size);
+}
+
+void Init_tuby_iseq(void) {
+  VALUE rb_cTuby = rb_define_module("Tuby");
+  VALUE rb_cTubyISeq = rb_define_class_under(rb_cTuby, "InstructionSequence", rb_cObject);
+  rb_define_method(rb_cTubyISeq, "to_binary", tb_iseq_to_binary, 0);
+}
+
 
 //   unsigned int iseq_size;
 //   const VALUE *iseq_encoded; /* encoded iseq (insn addr and operands) */
@@ -113,11 +189,6 @@ tb_iseq_constant_body_t * tb_iseq_constant_body_build(void) {
 //     } *keyword;
 //   } param;
 //
-//   tb_iseq_location_t location;
-//
-//   /* insn info, must be freed */
-//   const struct iseq_line_info_entry *line_info_table;
-//
 //   const ID *local_table;    /* must free */
 //
 //   /* catch table */
@@ -127,7 +198,6 @@ tb_iseq_constant_body_t * tb_iseq_constant_body_build(void) {
 //   const struct rb_iseq_struct *parent_iseq;
 //   struct rb_iseq_struct *local_iseq; /* local_iseq->flip_cnt can be modified */
 //
-//   union iseq_inline_storage_entry *is_entries;
 //   struct rb_call_info *ci_entries; /* struct rb_call_info ci_entries[ci_size];
 //             * struct rb_call_info_with_kwarg cikw_entries[ci_kw_size];
 //             * So that:
@@ -138,9 +208,6 @@ tb_iseq_constant_body_t * tb_iseq_constant_body_build(void) {
 //   VALUE mark_ary;     /* Array: includes operands which should be GC marked */
 //
 //   unsigned int local_table_size;
-//   unsigned int is_size;
 //   unsigned int ci_size;
-//   unsigned int ci_kw_size;
-//   unsigned int line_info_size;
 //   unsigned int stack_max; /* for stack overflow check */
 // };

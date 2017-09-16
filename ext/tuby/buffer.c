@@ -27,10 +27,14 @@ void tb_buffer_append(Buffer *buffer, const void *content, unsigned long size) {
   buffer->content[buffer->size] = '\0';
 }
 
-void tb_buffer_write(Buffer *buffer, const char *filepath) {
-  FILE *file = fopen(filepath, "w");
-  fwrite(buffer->content, 1, buffer->size, file);
-  fclose(file);
+const char * tb_buffer_output(Buffer *buffer) {
+  char *output = malloc(sizeof(char) * buffer->size);
+  strncpy(output, buffer->content, buffer->size);
+  return output;
+}
+
+size_t tb_buffer_size(Buffer *buffer) {
+  return buffer->size;
 }
 
 void tb_buffer_destroy(Buffer *buffer) {
