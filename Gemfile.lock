@@ -1,0 +1,27 @@
+PATH
+  remote: .
+  specs:
+    tuby (0.0.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    minitest (5.10.3)
+    racc (1.4.14)
+    rake (10.5.0)
+    rake-compiler (1.0.4)
+      rake
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler (~> 1.16.a)
+  minitest (~> 5.0)
+  racc (~> 1.4)
+  rake (~> 10.0)
+  rake-compiler (~> 1.0)
+  tuby!
+
+BUNDLED WITH
+   1.16.0.pre.2
