@@ -3,8 +3,8 @@
 #define ISEQ_MAJOR_VERSION 2
 #define ISEQ_MINOR_VERSION 3
 
-IBFHeader * tb_ibf_header_build(void) {
-  IBFHeader *header = (IBFHeader *) malloc(sizeof(IBFHeader));
+tb_ibf_header_t * tb_ibf_header_build(void) {
+  tb_ibf_header_t *header = (tb_ibf_header_t *) malloc(sizeof(tb_ibf_header_t));
 
   memcpy(header->magic, "YARB", 4);
   header->major_version = ISEQ_MAJOR_VERSION;
@@ -24,6 +24,6 @@ IBFHeader * tb_ibf_header_build(void) {
   return header;
 }
 
-void tb_ibf_header_destroy(IBFHeader *header) {
+void tb_ibf_header_destroy(tb_ibf_header_t *header) {
   free(header);
 }

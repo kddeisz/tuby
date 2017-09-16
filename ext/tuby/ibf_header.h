@@ -19,9 +19,9 @@ typedef struct tb_ibf_header {
   tb_ibf_offset_t iseq_list_offset;
   tb_ibf_offset_t id_list_offset;
   tb_ibf_offset_t object_list_offset;
-} IBFHeader;
+} tb_ibf_header_t;
 
-IBFHeader * tb_ibf_header_build(void);
-void tb_ibf_header_destroy(IBFHeader *header);
+tb_ibf_header_t * tb_ibf_header_build(void);
+void tb_ibf_header_destroy(tb_ibf_header_t *header);
 
 #endif

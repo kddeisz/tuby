@@ -6,8 +6,8 @@ struct tb_buffer {
   char *content;
 };
 
-Buffer * tb_buffer_build(void) {
-  Buffer *buffer = (Buffer *) malloc(sizeof(Buffer));
+tb_buffer_t * tb_buffer_build(void) {
+  tb_buffer_t *buffer = (tb_buffer_t *) malloc(sizeof(tb_buffer_t));
   buffer->size = 0;
   buffer->capacity = 2048;
   buffer->content = (char *) malloc(sizeof(char) * buffer->capacity);
@@ -15,7 +15,7 @@ Buffer * tb_buffer_build(void) {
   return buffer;
 }
 
-void tb_buffer_append(Buffer *buffer, const void *content, unsigned long size) {
+void tb_buffer_append(tb_buffer_t *buffer, const void *content, unsigned long size) {
   size_t new_size = buffer->size + size;
   while (new_size >= buffer->capacity) {
     buffer->capacity *= 2;
@@ -27,17 +27,17 @@ void tb_buffer_append(Buffer *buffer, const void *content, unsigned long size) {
   buffer->content[buffer->size] = '\0';
 }
 
-const char * tb_buffer_output(Buffer *buffer) {
+const char * tb_buffer_output(tb_buffer_t *buffer) {
   char *output = malloc(sizeof(char) * buffer->size);
   strncpy(output, buffer->content, buffer->size);
   return output;
 }
 
-size_t tb_buffer_size(Buffer *buffer) {
+size_t tb_buffer_size(tb_buffer_t *buffer) {
   return buffer->size;
 }
 
-void tb_buffer_destroy(Buffer *buffer) {
+void tb_buffer_destroy(tb_buffer_t *buffer) {
   free(buffer->content);
   free(buffer);
 }

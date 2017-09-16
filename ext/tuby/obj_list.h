@@ -4,10 +4,10 @@
 #include <stdlib.h>
 #include <ruby.h>
 
-typedef struct tb_obj_list ObjList;
+typedef struct tb_obj_list tb_obj_list_t;
 
-ObjList * tb_obj_list_build(void);
-int tb_obj_list_append(ObjList *obj_list, VALUE *contents);
-void tb_obj_list_destroy(ObjList *obj_list);
+tb_obj_list_t * tb_obj_list_build(void);
+int tb_obj_list_append(tb_obj_list_t *obj_list, VALUE *contents);
+void tb_obj_list_destroy(tb_obj_list_t *obj_list);
 
 #endif

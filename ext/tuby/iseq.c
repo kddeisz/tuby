@@ -76,7 +76,7 @@ void tb_iseq_set_line_info(tb_iseq_t *iseq, VALUE line_info_list) {
   }
 }
 
-static void tb_id_list_to_idx_list(long size, ObjList *obj_list, VALUE *ids_list, long *idx_list) {
+static void tb_id_list_to_idx_list(long size, tb_obj_list_t *obj_list, VALUE *ids_list, long *idx_list) {
   VALUE id;
   long idx;
 
@@ -87,11 +87,11 @@ static void tb_id_list_to_idx_list(long size, ObjList *obj_list, VALUE *ids_list
 }
 
 VALUE tb_iseq_to_binary(VALUE self) {
-  Buffer *buffer = tb_buffer_build();
-  ObjList *obj_list = tb_obj_list_build();
-  IBFHeader *header = tb_ibf_header_build();
+  tb_buffer_t *buffer = tb_buffer_build();
+  tb_obj_list_t *obj_list = tb_obj_list_build();
+  tb_ibf_header_t *header = tb_ibf_header_build();
 
-  tb_buffer_append(buffer, header, sizeof(IBFHeader));
+  tb_buffer_append(buffer, header, sizeof(tb_ibf_header_t));
   tb_buffer_append(buffer, RUBY_PLATFORM, strlen(RUBY_PLATFORM) + 1);
 
   VALUE ids_list = rb_funcall(self, rb_intern("ids_list"), 0, NULL);
