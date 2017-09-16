@@ -27,6 +27,10 @@ void tb_buffer_append(tb_buffer_t *buffer, const void *content, unsigned long si
   buffer->content[buffer->size] = '\0';
 }
 
+void tb_buffer_overwrite(tb_buffer_t *buffer, const void *content, unsigned long size) {
+  memcpy(buffer->content, (const char *) content, size);
+}
+
 const char * tb_buffer_output(tb_buffer_t *buffer) {
   char *output = malloc(sizeof(char) * buffer->size);
   strncpy(output, buffer->content, buffer->size);

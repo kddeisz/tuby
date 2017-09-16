@@ -24,6 +24,11 @@ tb_ibf_header_t * tb_ibf_header_build(void) {
   return header;
 }
 
+void tb_ibf_header_set_id_metadata(tb_ibf_header_t *header, unsigned int id_list_size, unsigned int id_list_offset) {
+  header->id_list_size = id_list_size;
+  header->id_list_offset = id_list_offset;
+}
+
 void tb_ibf_header_destroy(tb_ibf_header_t *header) {
   free(header);
 }

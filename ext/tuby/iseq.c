@@ -95,11 +95,12 @@ VALUE tb_iseq_to_binary(VALUE self) {
   tb_buffer_append(buffer, RUBY_PLATFORM, strlen(RUBY_PLATFORM) + 1);
 
   VALUE ids_list = rb_funcall(self, rb_intern("ids_list"), 0, NULL);
-
   long id_idx_list_size = RARRAY_LEN(ids_list);
   long id_idx_list[id_idx_list_size];
   tb_id_list_to_idx_list(id_idx_list_size, obj_list, &ids_list, id_idx_list);
+  tb_ibf_header_set_id_metadata(header, id_idx_list_size, 0);
 
+  tb_buffer_overwrite(buffer, header, sizeof(tb_ibf_header_t));
   const char *output = tb_buffer_output(buffer);
   size_t output_size = tb_buffer_size(buffer);
 
