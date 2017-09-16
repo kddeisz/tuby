@@ -3,6 +3,6 @@
 
 #include <ruby.h>
 
-void Init_tuby();
+void Init_tuby(void);
 
 #endif

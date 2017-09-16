@@ -9,6 +9,6 @@ typedef struct tb_iseq tb_iseq_t;
 
 tb_iseq_location_t * tb_iseq_location_build(const char *filename);
 tb_iseq_t * tb_iseq_build(const char *filename);
-void Init_tuby_iseq(void);
+VALUE tb_iseq_to_binary(VALUE self);
 
 #endif

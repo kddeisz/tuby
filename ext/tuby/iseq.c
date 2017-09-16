@@ -86,7 +86,7 @@ static void tb_id_list_to_idx_list(long size, ObjList *obj_list, VALUE *ids_list
   }
 }
 
-static VALUE tb_iseq_to_binary(VALUE self) {
+VALUE tb_iseq_to_binary(VALUE self) {
   Buffer *buffer = tb_buffer_build();
   ObjList *obj_list = tb_obj_list_build();
   IBFHeader *header = tb_ibf_header_build();
@@ -109,13 +109,6 @@ static VALUE tb_iseq_to_binary(VALUE self) {
 
   return rb_str_new(output, output_size);
 }
-
-void Init_tuby_iseq(void) {
-  VALUE rb_cTuby = rb_define_module("Tuby");
-  VALUE rb_cTubyISeq = rb_define_class_under(rb_cTuby, "InstructionSequence", rb_cObject);
-  rb_define_method(rb_cTubyISeq, "to_binary", tb_iseq_to_binary, 0);
-}
-
 
 //   unsigned int iseq_size;
 //   const VALUE *iseq_encoded; /* encoded iseq (insn addr and operands) */
